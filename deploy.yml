@@ -14,11 +14,11 @@
       register: result
       ignore_errors: true
       
-      shell: docker pull ramyareddymallu/myapp:$GO_PIPELINE_COUNTER
+      shell: docker pull ramyareddymallu/{{app}}:{{build_number}}
       when: result|failed
       
       shell: docker stop {{app}}
       when: result|succeeded
       
     - name: Run application
-      shell: docker run -it -d --name {{app}} -p 8080:8080 ramyareddymallu/myapp:$GO_PIPELINE_COUNTER
+      shell: docker run -d --name {{app}} -p 8080:8080 ramyareddymallu/{{app}}:{{build_number}}
