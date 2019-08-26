@@ -1,12 +1,24 @@
 ---
   - hosts: demo
+    vars:
+      provider:
+        build_number: "{{build_number}}"
+        app: "{{app}}"
     become_method: sudo
     tasks:
-    - name: Make sure that we can connect to the machine-ip
-      command: hostname
-      register: command_result
-      failed_when: "'FAILED' in command_result.stderr"
-    - name: Run The shell script
-      copy:
-         src: /opt/artifacts/pipelines/CICD-FLOW/3/package/1/pakage/pakage/target/myweb-6.0.0-SNAPSHOT.war
-         dest: /home/ec2-user/tomcat8/webapps
+    - name: login to docker hub
+      shell: docker login -u ramyareddymallu -p rajasekharreddy
+      
+    - name: check the container status
+      shell: docker inspect --format="{{.ID}}" {{app}}
+      register: result
+      ignore_errors: true
+      
+      shell: docker pull ramyareddymallu/myapp:$GO_PIPELINE_COUNTER
+      when: result|failed
+      
+      shell: docker stop {{app}}
+      when: result|succeeded
+      
+    - name: Run application
+      shell: docker run -it -d --name {{app}} -p 8080:8080 ramyareddymallu/myapp:$GO_PIPELINE_COUNTER
