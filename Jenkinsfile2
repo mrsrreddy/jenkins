@@ -10,5 +10,13 @@ node {
         mail bcc: '', body: '''Hi Welcome to Jenkins job alerts
         Thanks
         Ramya''', cc: '', from: '', replyTo: '', subject: 'jenkins-jobfaild-alerts', to: 'malluramyareddy@gmail.com'
-      }
+    }
+    stage('build docker image'){
+         sh 'pwd'
+         sh 'cp /var/lib/jenkins/workspace/email/target/myweb-8.0.0-SNAPSHOT.war /var/lib/jenkins/workspace/email'
+         sh 'ls -lrt'
+         sh 'docker build -t ramyareddymallu/email:2.0.0 .'
+        
+        
+    }
 }
