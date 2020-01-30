@@ -1,0 +1,35 @@
+node {
+    stage('Git'){
+      git 'https://github.com/mrsrreddy/jenkins'  
+      }
+    stage('Maven Build'){
+      def mvnHome = tool name: 'Maven-3', type: 'maven'
+      sh "${mvnHome}/bin/mvn package"   
+      }
+    stage('Email Notification'){
+        mail bcc: '', body: '''Hi Welcome to Jenkins job alerts
+        Thanks
+        Ramya''', cc: '', from: '', replyTo: '', subject: 'jenkins-jobfaild-alerts', to: 'malluramyareddy@gmail.com'
+    }
+    stage('build docker image'){
+         sh 'pwd'
+         sh 'cp /var/lib/jenkins/workspace/email/target/myweb-8.0.0-SNAPSHOT.war /var/lib/jenkins/workspace/email'
+         sh 'ls -lrt'
+         sh 'docker build -t ramyareddymallu/vijay:2.0.0 .'
+    }
+    stage ('push to dockerhub'){
+         withCredentials([string(credentialsId: 'docker', variable: 'dockerhub')]) {
+         // some block
+         sh "docker login -u ramyareddymallu -p ${dockerhub}"
+         } 
+         sh 'docker push ramyareddymallu/vijay:2.0.0'
+    }
+    stage('Sonar Scanner'){
+      def mvnHome = tool name: 'Maven-3', type: 'maven'
+      withSonarQubeEnv('sonar') {
+    // some block
+         sh "${mvnHome}/bin/mvn sonar:sonar"
+      }
+         
+    }
+}
